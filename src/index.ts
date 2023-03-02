@@ -12,5 +12,6 @@ app.listen(PORT, () => {
 })
 //Middlewares
 app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
 app.use(morgan('dev'))
 app.use('/api/user', userRoute)

@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client'
+import { comparePassword, hashPassword } from '../middleware/userPassword'
 
 const prisma = new PrismaClient()
 
@@ -49,7 +50,7 @@ export const createUser = async (req, res) => {
     const user = await prisma.user.create({
         data: {
             email: email,
-            password: password,
+            password: await hashPassword(password),
             companyName: companyName,
             board: board,
         },
@@ -57,6 +58,28 @@ export const createUser = async (req, res) => {
     res.status(201).json({
         message: 'User created',
         user,
+    })
+}
+
+export const loginUser = async (req, res, next) => {
+    const { email, password } = req.body
+    const existingUser = await prisma.user.findUnique({
+        where: {
+            email: email,
+        },
+    })
+    if (!existingUser) {
+        return res.status(400).json({
+            message: 'User does not exist',
+        })
+    }
+    const isValid = await comparePassword(password, existingUser.password)
+    if (!isValid) {
+        res.status(401).json({ message: 'Invalid password' })
+    }
+    res.status(200).json({
+        message: 'User logged in',
+        user: existingUser,
     })
 }
 
