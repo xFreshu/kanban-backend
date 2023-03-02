@@ -2,15 +2,37 @@ import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
-export const getUsers = (req, res) => {
-    res.send('user from controller')
+export const getUsers = async (req, res, next) => {
+    let users
+    try {
+        users = await prisma.user.findMany()
+    } catch (err) {
+        return next(err)
+    }
+    res.status(200).json({
+        message: 'Users fetched',
+        users: users,
+    })
 }
 
-export const getUserByID = (req, res) => {
-    res.send('user :id from controller')
+export const getUserByID = async (req, res, next) => {
+    const id = Number(req.params.id)
+    let user
+    try {
+        user = await prisma.user.findUnique({
+            where: {
+                id,
+            },
+        })
+    } catch (err) {
+        return next(err)
+    }
+    res.status(200).json({
+        user: user,
+    })
 }
 
-export const createUser = async (req, res, next) => {
+export const createUser = async (req, res) => {
     const { email, password, companyName, board } = req.body
     // validate existing user
     const existingUser = await prisma.user.findUnique({
@@ -34,14 +56,42 @@ export const createUser = async (req, res, next) => {
     })
     res.status(201).json({
         message: 'User created',
-        user: user,
+        user,
     })
 }
 
-export const updateUser = (req, res) => {
-    res.send('user patch from controller')
+export const updateUser = async (req, res, next) => {
+    const { email } = req.body
+    const id = Number(req.params.id)
+    let updatedUser
+    try {
+        updatedUser = await prisma.user.update({
+            where: {
+                id,
+            },
+            data: {
+                email,
+            },
+        })
+    } catch (err) {
+        return next(err)
+    }
+    res.status(200).json({
+        message: 'Updated',
+        updatedUser,
+    })
 }
 
-export const deleteUser = (req, res) => {
-    res.send('user delete from controller')
+export const deleteUser = async (req, res, next) => {
+    const id = Number(req.params.id)
+    try {
+        await prisma.user.delete({
+            where: {
+                id,
+            },
+        })
+    } catch (err) {
+        return next(err)
+    }
+    res.status(200).json({ message: 'User deleted' })
 }
