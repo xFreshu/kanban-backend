@@ -32,7 +32,7 @@ export const getBoardByID = async (req, res, next) => {
 }
 export const createBoard = async (req, res, next) => {
     const id = Number(req.params.id)
-    const { name, email } = req.body
+    const { name } = req.body
     console.log(id)
     let userBoards
     try {
