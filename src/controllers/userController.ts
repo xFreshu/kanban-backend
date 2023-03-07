@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import { comparePassword, hashPassword } from '../middleware/userPassword'
 import { generateToken } from '../middleware/jwt'
+import { validationResult } from 'express-validator'
 
 const prisma = new PrismaClient()
 
@@ -35,6 +36,15 @@ export const getUserByID = async (req, res, next) => {
 }
 
 export const createUser = async (req, res) => {
+    const errors = validationResult(req)
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({
+            message: 'Invalid inputs',
+            errors: errors.array(),
+        })
+    }
+
     const { email, password, companyName, board } = req.body
     // validate existing user
     const existingUser = await prisma.user.findUnique({
