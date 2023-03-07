@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import { comparePassword, hashPassword } from '../middleware/userPassword'
+import { generateToken } from '../middleware/jwt'
 
 const prisma = new PrismaClient()
 
@@ -61,7 +62,7 @@ export const createUser = async (req, res) => {
     })
 }
 
-export const loginUser = async (req, res, next) => {
+export const loginUser = async (req, res) => {
     const { email, password } = req.body
     const existingUser = await prisma.user.findUnique({
         where: {
@@ -77,8 +78,10 @@ export const loginUser = async (req, res, next) => {
     if (!isValid) {
         res.status(401).json({ message: 'Invalid password' })
     }
+    const token = generateToken(existingUser)
     res.status(200).json({
         message: 'User logged in',
+        token,
         user: existingUser,
     })
 }
