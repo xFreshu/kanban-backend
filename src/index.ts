@@ -3,6 +3,7 @@ import * as dotenv from 'dotenv'
 import morgan from 'morgan'
 import userRoute from './routes/userRoute'
 import boardRoute from './routes/boardRoute'
+import taskRoute from './routes/taskRoute'
 import userAuthRoute from './routes/userAuthRoute'
 import { verifyToken } from './middleware/jwt'
 const app = express()
@@ -21,3 +22,4 @@ app.use(morgan('dev'))
 app.use('/api/auth/user', userAuthRoute)
 app.use('/api/user', verifyToken, userRoute)
 app.use('/api/board', verifyToken, boardRoute)
+app.use('/api/tasks', verifyToken, taskRoute)
